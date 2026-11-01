@@ -1,0 +1,350 @@
+:root {
+  --ink: #0c0b0a;
+  --ink-soft: #171411;
+  --paper: #f3ead8;
+  --paper-dim: #d9cbb3;
+  --amber: #e8c478;
+  --amber-deep: #c4923a;
+  --line: rgba(243, 234, 216, 0.14);
+  --ok: #7dcea0;
+  --danger: #e07a5f;
+  --font-display: "Syne", sans-serif;
+  --font-body: "Figtree", sans-serif;
+  --radius: 14px;
+  --max: 72rem;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--paper);
+  background: var(--ink);
+  line-height: 1.55;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--amber);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+.atmosphere {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(1200px 700px at 80% -10%, rgba(232, 196, 120, 0.18), transparent 60%),
+    radial-gradient(900px 600px at -10% 90%, rgba(196, 146, 58, 0.12), transparent 55%),
+    linear-gradient(165deg, #14110e 0%, #0c0b0a 45%, #080706 100%);
+}
+
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  animation: drift 14s ease-in-out infinite alternate;
+}
+
+.glow-a {
+  width: 28rem;
+  height: 28rem;
+  right: -6rem;
+  top: 10vh;
+  background: rgba(232, 196, 120, 0.22);
+}
+
+.glow-b {
+  width: 22rem;
+  height: 22rem;
+  left: -8rem;
+  bottom: 5vh;
+  background: rgba(125, 206, 160, 0.1);
+  animation-delay: -4s;
+}
+
+.grooves {
+  position: absolute;
+  width: min(92vw, 52rem);
+  height: min(92vw, 52rem);
+  right: -12vw;
+  top: 6vh;
+  opacity: 0.55;
+  animation: spin-slow 80s linear infinite;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(2rem, -1.5rem, 0);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.top {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  font-size: 0.95rem;
+  color: var(--paper);
+  text-decoration: none;
+}
+
+main {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 1.5rem 4rem;
+}
+
+.hero {
+  min-height: calc(100svh - 4rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 36rem;
+  padding: 3rem 0 4rem;
+  animation: rise 0.9s ease-out both;
+}
+
+.brand-mark {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.8rem, 10vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: var(--paper);
+  text-wrap: balance;
+}
+
+.hero h1 {
+  margin: 0 0 1rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.6rem, 4.2vw, 2.35rem);
+  line-height: 1.15;
+  color: var(--amber);
+  animation: rise 0.9s ease-out 0.12s both;
+}
+
+.lede {
+  margin: 0 0 2rem;
+  font-size: 1.08rem;
+  color: var(--paper-dim);
+  max-width: 28rem;
+  animation: rise 0.9s ease-out 0.22s both;
+}
+
+.cta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  animation: rise 0.9s ease-out 0.32s both;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.98rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn.primary {
+  background: var(--amber);
+  color: var(--ink);
+}
+
+.btn.primary:hover {
+  background: #f0d291;
+}
+
+.btn.ghost {
+  background: transparent;
+  color: var(--paper);
+  border-color: var(--line);
+}
+
+.btn.ghost:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.panel {
+  margin: 0 0 1.25rem;
+  padding: 1.75rem 0 2rem;
+  border-top: 1px solid var(--line);
+  max-width: 36rem;
+  animation: rise 0.8s ease-out both;
+}
+
+.panel h2 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+}
+
+.panel p {
+  margin: 0 0 1rem;
+  color: var(--paper-dim);
+}
+
+.steps {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: var(--paper-dim);
+}
+
+.steps li {
+  margin-bottom: 0.45rem;
+}
+
+.fine {
+  font-size: 0.9rem;
+  color: rgba(217, 203, 179, 0.75);
+}
+
+.try-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.field span {
+  font-size: 0.85rem;
+  color: var(--paper-dim);
+}
+
+.field input,
+.field select {
+  width: 100%;
+  min-height: 2.9rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--paper);
+  padding: 0.65rem 0.9rem;
+  font: inherit;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: 2px solid rgba(232, 196, 120, 0.45);
+  outline-offset: 1px;
+}
+
+.result {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  overflow-x: auto;
+  font-size: 0.85rem;
+  color: var(--ok);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.result.error {
+  color: var(--danger);
+}
+
+.foot {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--line);
+  color: rgba(217, 203, 179, 0.7);
+  font-size: 0.9rem;
+}
+
+.foot a {
+  color: inherit;
+}
+
+@media (max-width: 720px) {
+  .grooves {
+    opacity: 0.28;
+    right: -30vw;
+    top: 18vh;
+  }
+
+  .hero {
+    min-height: calc(100svh - 3rem);
+    padding-top: 2.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

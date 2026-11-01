@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Install UNI-SHARE Shortcut</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/">UNI-SHARE</a>
+    </header>
+    <main>
+      <section class="panel" style="border-top: none; padding-top: 2.5rem">
+        <h2>Install the Shortcut</h2>
+        <p>
+          Apple only imports signed Shortcut files from iCloud or a Mac signing
+          step. This page sets the API base URL and walks you through a one-time
+          build in the Shortcuts app.
+        </p>
+
+        <label class="field">
+          <span>API base URL</span>
+          <input id="base-url" type="url" placeholder="https://your-host.example" />
+        </label>
+
+        <div class="cta-row" style="margin-top: 1rem">
+          <button class="btn primary" id="copy-endpoint" type="button">
+            Copy convert endpoint
+          </button>
+          <a class="btn ghost" href="/shortcut/blueprint.md">Open blueprint</a>
+        </div>
+
+        <ol class="steps" style="margin-top: 1.5rem">
+          <li>Open the Shortcuts app and create a new Shortcut named <strong>UNI-SHARE</strong>.</li>
+          <li>Add <em>Receive</em> input from Share Sheet — accept URLs / Text.</li>
+          <li>Add <em>Choose from Menu</em> with: Apple Music, Deezer, Tidal, Spotify.</li>
+          <li>
+            Under each menu item, set a Text value for the target:
+            <code>apple_music</code>, <code>deezer</code>, <code>tidal</code>,
+            <code>spotify</code>.
+          </li>
+          <li>
+            Add <em>Get Contents of URL</em>. Method POST. URL = your convert
+            endpoint (button above). Request body JSON:
+            <code>{"url":"Shortcut Input","target":"Menu Result"}</code>
+            (use Magic Variables for those fields). Header
+            <code>Content-Type: application/json</code>.
+          </li>
+          <li>Add <em>Get Dictionary Value</em> for key <code>url</code>.</li>
+          <li>Add <em>Open URLs</em> with that value.</li>
+          <li>
+            Optional: Share the Shortcut via iCloud, then set
+            <code>SHORTCUT_INSTALL_URL</code> on the server so Add Shortcut becomes one tap.
+          </li>
+        </ol>
+
+        <p class="fine">
+          Details and a machine-readable action list live in
+          <a href="/shortcut/blueprint.md">blueprint.md</a>.
+        </p>
+      </section>
+    </main>
+    <script>
+      (async () => {
+        const input = document.getElementById("base-url");
+        const btn = document.getElementById("copy-endpoint");
+        try {
+          const cfg = await fetch("/api/v1/config").then((r) => r.json());
+          if (cfg.publicBaseUrl) input.value = cfg.publicBaseUrl.replace(/\/$/, "");
+        } catch (_) {}
+        if (!input.value) input.value = window.location.origin;
+
+        btn.addEventListener("click", async () => {
+          const base = input.value.replace(/\/$/, "");
+          const endpoint = base + "/api/v1/convert";
+          await navigator.clipboard.writeText(endpoint);
+          btn.textContent = "Copied";
+          setTimeout(() => (btn.textContent = "Copy convert endpoint"), 1500);
+        });
+      })();
+    </script>
+  </body>
+</html>

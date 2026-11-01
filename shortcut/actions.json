@@ -1,0 +1,26 @@
+{
+  "name": "UNI-SHARE",
+  "description": "Convert a shared music track URL to Apple Music, Deezer, Tidal, or Spotify via the UNI-SHARE API.",
+  "accepts": ["URL", "Text"],
+  "api": {
+    "method": "POST",
+    "path": "/api/v1/convert",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "url": "{{input}}",
+      "target": "{{menu}}"
+    }
+  },
+  "menu": [
+    { "label": "Apple Music", "target": "apple_music" },
+    { "label": "Deezer", "target": "deezer" },
+    { "label": "Tidal", "target": "tidal" },
+    { "label": "Spotify", "target": "spotify" }
+  ],
+  "result": {
+    "dictionaryKey": "url",
+    "action": "open_url"
+  }
+}
