@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Generate an unsigned UNI-SHARE Shortcut plist (binary)."""
+"""Generate unsigned UNI-SHARE Shortcut — per-menu-branch convert (reliable params)."""
+from __future__ import annotations
+
 import plistlib
 import sys
 import uuid
@@ -19,6 +21,11 @@ def text_token(text: str, attachments: dict | None = None) -> dict:
     }
 
 
+def dict_token_value(attachments: dict) -> dict:
+    """Dictionary field value from a magic variable."""
+    return text_token(OCR, attachments)
+
+
 def out_ref(uid: str, name: str, coerce: str | None = None) -> dict:
     ref: dict = {"OutputUUID": uid, "OutputName": name, "Type": "ActionOutput"}
     if coerce:
@@ -31,162 +38,32 @@ def out_ref(uid: str, name: str, coerce: str | None = None) -> dict:
     return ref
 
 
-def main() -> None:
-    endpoint = sys.argv[1]
-    out = Path(sys.argv[2])
+def ask_ref(ask_u: str) -> dict:
+    return out_ref(ask_u, "Lien du morceau", "WFStringContentItem")
 
-    api_u = U()
-    clip_u = U()
-    ask_u = U()
-    menu_u = U()
-    menu_g = U()
-    req_u = U()
+
+def convert_actions(endpoint: str, ask_u: str) -> list[dict]:
+    """POST convert → parse → clipboard + open, or show error."""
     dl_u = U()
     dict_u = U()
     url_u = U()
     err_u = U()
     if_g = U()
-    open_u = U()
-    clip_out_u = U()
-
-    shortcut_in = {"Type": "ExtensionInput", "VariableName": "Shortcut Input"}
     actions: list[dict] = []
 
-    # 1) API endpoint
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
-            "WFWorkflowActionParameters": {
-                "UUID": api_u,
-                "CustomOutputName": "URL API de conversion",
-                "WFTextActionText": endpoint,
-            },
-        }
-    )
+    # target is filled by caller via closure — we build download with placeholder
+    # replaced per branch; this helper receives target string.
+    return actions  # unused
 
-    # 2) Clipboard (also NoInputBehaviorGetClipboard)
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.getclipboard",
-            "WFWorkflowActionParameters": {
-                "UUID": clip_u,
-                "CustomOutputName": "Presse-papiers",
-            },
-        }
-    )
 
-    # 3) Ask / confirm URL — default Shortcut Input (share or clipboard-via-no-input)
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.ask",
-            "WFWorkflowActionParameters": {
-                "UUID": ask_u,
-                "CustomOutputName": "Lien du morceau",
-                "WFAskActionPrompt": "Lien du morceau (partage, presse-papiers ou colle)",
-                "WFInputType": "URL",
-                "WFAskActionDefaultAnswer": text_token(
-                    OCR, {"{0, 1}": shortcut_in}
-                ),
-            },
-        }
-    )
+def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
+    dl_u = U()
+    dict_u = U()
+    url_u = U()
+    err_u = U()
+    if_g = U()
+    actions: list[dict] = []
 
-    # 4) Platform menu
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
-            "WFWorkflowActionParameters": {
-                "UUID": menu_u,
-                "GroupingIdentifier": menu_g,
-                "WFControlFlowMode": 0,
-                "WFMenuPrompt": "Ouvrir sur",
-                "WFMenuItems": ["Apple Music", "Deezer", "Tidal", "Spotify"],
-            },
-        }
-    )
-    for title, target in [
-        ("Apple Music", "apple_music"),
-        ("Deezer", "deezer"),
-        ("Tidal", "tidal"),
-        ("Spotify", "spotify"),
-    ]:
-        actions.append(
-            {
-                "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
-                "WFWorkflowActionParameters": {
-                    "GroupingIdentifier": menu_g,
-                    "WFControlFlowMode": 1,
-                    "WFMenuItemTitle": title,
-                },
-            }
-        )
-        actions.append(
-            {
-                "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
-                "WFWorkflowActionParameters": {
-                    "UUID": U(),
-                    "CustomOutputName": "cible",
-                    "WFTextActionText": target,
-                },
-            }
-        )
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
-            "WFWorkflowActionParameters": {
-                "GroupingIdentifier": menu_g,
-                "WFControlFlowMode": 2,
-            },
-        }
-    )
-
-    # 5) Request dictionary
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.dictionary",
-            "WFWorkflowActionParameters": {
-                "UUID": req_u,
-                "CustomOutputName": "Requête",
-                "WFItems": {
-                    "Value": {
-                        "WFDictionaryFieldValueItems": [
-                            {
-                                "WFItemType": 0,
-                                "WFKey": text_token("url"),
-                                "WFValue": text_token(
-                                    OCR,
-                                    {
-                                        "{0, 1}": out_ref(
-                                            ask_u,
-                                            "Lien du morceau",
-                                            "WFStringContentItem",
-                                        )
-                                    },
-                                ),
-                            },
-                            {
-                                "WFItemType": 0,
-                                "WFKey": text_token("target"),
-                                "WFValue": text_token(
-                                    OCR,
-                                    {
-                                        "{0, 1}": out_ref(
-                                            menu_u,
-                                            "Menu Result",
-                                            "WFStringContentItem",
-                                        )
-                                    },
-                                ),
-                            },
-                        ]
-                    },
-                    "WFSerializationType": "WFDictionaryFieldValue",
-                },
-            },
-        }
-    )
-
-    # 6) POST
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
@@ -196,9 +73,8 @@ def main() -> None:
                 "ShowHeaders": False,
                 "WFHTTPMethod": "POST",
                 "WFHTTPBodyType": "JSON",
-                "WFURL": text_token(
-                    OCR, {"{0, 1}": out_ref(api_u, "URL API de conversion")}
-                ),
+                # Plain string URL — no empty magic var
+                "WFURL": endpoint,
                 "WFHTTPHeaders": {
                     "Value": {
                         "WFDictionaryFieldValueItems": [
@@ -212,14 +88,28 @@ def main() -> None:
                     "WFSerializationType": "WFDictionaryFieldValue",
                 },
                 "WFJSONValues": {
-                    "Value": out_ref(req_u, "Requête"),
-                    "WFSerializationType": "WFTextTokenAttachment",
+                    "Value": {
+                        "WFDictionaryFieldValueItems": [
+                            {
+                                "WFItemType": 0,
+                                "WFKey": text_token("url"),
+                                "WFValue": dict_token_value(
+                                    {"{0, 1}": ask_ref(ask_u)}
+                                ),
+                            },
+                            {
+                                "WFItemType": 0,
+                                "WFKey": text_token("target"),
+                                "WFValue": text_token(target),
+                            },
+                        ]
+                    },
+                    "WFSerializationType": "WFDictionaryFieldValue",
                 },
             },
         }
     )
 
-    # 7) Parse
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.detect.dictionary",
@@ -248,7 +138,7 @@ def main() -> None:
         }
     )
 
-    # 8) If result contains http → clipboard + notify + open; else show error
+    # If contains http
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
@@ -269,7 +159,7 @@ def main() -> None:
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.setclipboard",
             "WFWorkflowActionParameters": {
-                "UUID": clip_out_u,
+                "UUID": U(),
                 "WFInput": {
                     "Value": out_ref(url_u, "URL résultat"),
                     "WFSerializationType": "WFTextTokenAttachment",
@@ -279,19 +169,9 @@ def main() -> None:
     )
     actions.append(
         {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.notification",
-            "WFWorkflowActionParameters": {
-                "UUID": U(),
-                "WFNotificationActionTitle": "UNI-SHARE",
-                "WFNotificationActionBody": "Lien copié dans le presse-papiers",
-            },
-        }
-    )
-    actions.append(
-        {
             "WFWorkflowActionIdentifier": "is.workflow.actions.openurl",
             "WFWorkflowActionParameters": {
-                "UUID": open_u,
+                "UUID": U(),
                 "WFInput": {
                     "Value": out_ref(url_u, "URL résultat", "WFURLContentItem"),
                     "WFSerializationType": "WFTextTokenAttachment",
@@ -300,7 +180,7 @@ def main() -> None:
         }
     )
 
-    # Otherwise
+    # Otherwise show API message
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
@@ -343,6 +223,88 @@ def main() -> None:
             "WFWorkflowActionParameters": {
                 "UUID": U(),
                 "GroupingIdentifier": if_g,
+                "WFControlFlowMode": 2,
+            },
+        }
+    )
+    return actions
+
+
+def main() -> None:
+    endpoint = sys.argv[1].rstrip("/")
+    if not endpoint.endswith("/api/v1/convert"):
+        endpoint = endpoint + "/api/v1/convert"
+    out = Path(sys.argv[2])
+
+    ask_u = U()
+    menu_g = U()
+    menu_u = U()
+    clip_u = U()
+
+    actions: list[dict] = []
+
+    actions.append(
+        {
+            "WFWorkflowActionIdentifier": "is.workflow.actions.getclipboard",
+            "WFWorkflowActionParameters": {
+                "UUID": clip_u,
+                "CustomOutputName": "Presse-papiers",
+            },
+        }
+    )
+
+    actions.append(
+        {
+            "WFWorkflowActionIdentifier": "is.workflow.actions.ask",
+            "WFWorkflowActionParameters": {
+                "UUID": ask_u,
+                "CustomOutputName": "Lien du morceau",
+                "WFAskActionPrompt": "Lien du morceau (partage, presse-papiers ou colle)",
+                "WFInputType": "URL",
+                "WFAskActionDefaultAnswer": text_token(
+                    OCR,
+                    {"{0, 1}": {"Type": "ExtensionInput", "VariableName": "Shortcut Input"}},
+                ),
+            },
+        }
+    )
+
+    actions.append(
+        {
+            "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+            "WFWorkflowActionParameters": {
+                "UUID": menu_u,
+                "GroupingIdentifier": menu_g,
+                "WFControlFlowMode": 0,
+                "WFMenuPrompt": "Ouvrir sur",
+                "WFMenuItems": ["Apple Music", "Deezer", "Tidal", "Spotify"],
+            },
+        }
+    )
+
+    for title, target in [
+        ("Apple Music", "apple_music"),
+        ("Deezer", "deezer"),
+        ("Tidal", "tidal"),
+        ("Spotify", "spotify"),
+    ]:
+        actions.append(
+            {
+                "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+                "WFWorkflowActionParameters": {
+                    "GroupingIdentifier": menu_g,
+                    "WFControlFlowMode": 1,
+                    "WFMenuItemTitle": title,
+                },
+            }
+        )
+        actions.extend(branch_convert(endpoint, ask_u, target))
+
+    actions.append(
+        {
+            "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+            "WFWorkflowActionParameters": {
+                "GroupingIdentifier": menu_g,
                 "WFControlFlowMode": 2,
             },
         }
