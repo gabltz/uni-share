@@ -6,3 +6,5 @@ _site/
 *.swp
 .idea/
 .vscode/
+static/shortcut/*unsigned*
+static/shortcut/*.unsigned.plist

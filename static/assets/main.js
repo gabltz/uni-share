@@ -9,18 +9,24 @@
   const addShortcut = document.getElementById("add-shortcut");
   const note = document.getElementById("shortcut-note");
   const healthLink = document.getElementById("health-link");
+  const FILE_INSTALL = "shortcut/UNI-SHARE.shortcut";
 
   function apiUrl(path) {
     return `${apiBase}${path}`;
   }
 
-  function applyShortcutUrl(url) {
+  function applyShortcutUrl(url, kind) {
     if (!url || !shortcutInstall) return false;
     shortcutInstall.href = url;
     if (addShortcut) addShortcut.href = url;
     if (note) {
-      note.textContent =
-        "Install opens your published iCloud Shortcut link. Re-export from Shortcuts after changing the API base URL.";
+      if (kind === "icloud") {
+        note.textContent =
+          "Install opens your published iCloud Shortcut link. After changing the API base URL in Shortcuts, re-share the iCloud link.";
+      } else if (kind === "file") {
+        note.textContent =
+          "Installs the signed UNI-SHARE.shortcut file. On iPhone: allow Untrusted Shortcuts if asked. Edit the first Text action (API Convert URL) if your public host is not already set.";
+      }
     }
     return true;
   }
@@ -30,8 +36,9 @@
       healthLink.href = apiUrl("/health");
     }
 
+    let usedIcloud = false;
     if (site.shortcutInstallUrl) {
-      applyShortcutUrl(site.shortcutInstallUrl);
+      usedIcloud = applyShortcutUrl(site.shortcutInstallUrl, "icloud");
     }
 
     try {
@@ -43,17 +50,14 @@
         if (healthLink) healthLink.href = apiUrl("/health");
       }
       if (data.shortcutInstallUrl) {
-        applyShortcutUrl(data.shortcutInstallUrl);
-      } else if (!site.shortcutInstallUrl && note) {
-        note.textContent =
-          "No iCloud Shortcut URL is configured yet. Use the install page to build the Shortcut, or set SHORTCUT_INSTALL_URL on the API host.";
+        usedIcloud = applyShortcutUrl(data.shortcutInstallUrl, "icloud");
       }
     } catch (_) {
-      if (!site.shortcutInstallUrl && note) {
-        note.textContent = apiBase
-          ? "Could not reach the API config endpoint. Convert still uses the configured API base URL."
-          : "No API base URL configured for this static site. Set API_BASE_URL in the Pages build, or open the site served by the API.";
-      }
+      /* ignore — fall through to file install */
+    }
+
+    if (!usedIcloud) {
+      applyShortcutUrl(FILE_INSTALL, "file");
     }
   }
 

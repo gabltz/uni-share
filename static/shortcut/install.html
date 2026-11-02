@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- BASE_HREF: rewritten to /uni-share/ for GitHub Pages project sites -->
     <base href="/" />
     <title>Install UNI-SHARE Shortcut</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -22,51 +21,51 @@
       <section class="panel" style="border-top: none; padding-top: 2.5rem">
         <h2>Install the Shortcut</h2>
         <p>
-          Apple only imports signed Shortcut files from iCloud or a Mac signing
-          step. This page sets the API base URL and walks you through a one-time
-          build in the Shortcuts app.
+          One tap installs the signed <strong>UNI-SHARE</strong> Shortcut. On
+          iPhone/iPad, allow <em>Untrusted Shortcuts</em> if iOS asks (Settings →
+          Shortcuts). Prefer an iCloud link when
+          <code>SHORTCUT_INSTALL_URL</code> is set on the server.
         </p>
 
-        <label class="field">
-          <span>API base URL</span>
-          <input id="base-url" type="url" placeholder="https://your-api-host.example" />
+        <div class="cta-row" style="margin-top: 1rem">
+          <a class="btn primary" id="install-btn" href="shortcut/UNI-SHARE.shortcut"
+            >Add Shortcut</a
+          >
+          <a class="btn ghost" href="shortcut/blueprint.md">Open blueprint</a>
+        </div>
+        <p class="fine" id="install-note">
+          File install uses <code>shortcut/UNI-SHARE.shortcut</code> (signed for
+          anyone). Apple’s one-tap iCloud import is smoother once you share the
+          Shortcut from the Mac Shortcuts app and set
+          <code>SHORTCUT_INSTALL_URL</code>.
+        </p>
+
+        <label class="field" style="margin-top: 1.5rem">
+          <span>API base URL (for reference / manual rebuild)</span>
+          <input id="base-url" type="url" placeholder="https://your-hostname.example" />
         </label>
 
         <div class="cta-row" style="margin-top: 1rem">
-          <button class="btn primary" id="copy-endpoint" type="button">
+          <button class="btn ghost" id="copy-endpoint" type="button">
             Copy convert endpoint
           </button>
-          <a class="btn ghost" href="shortcut/blueprint.md">Open blueprint</a>
         </div>
 
-        <ol class="steps" style="margin-top: 1.5rem">
-          <li>Open the Shortcuts app and create a new Shortcut named <strong>UNI-SHARE</strong>.</li>
-          <li>Add <em>Receive</em> input from Share Sheet — accept URLs / Text.</li>
-          <li>Add <em>Choose from Menu</em> with: Apple Music, Deezer, Tidal, Spotify.</li>
+        <h2 style="margin-top: 2rem">After install</h2>
+        <ol class="steps">
           <li>
-            Under each menu item, set a Text value for the target:
-            <code>apple_music</code>, <code>deezer</code>, <code>tidal</code>,
-            <code>spotify</code>.
+            Open the Shortcut named <strong>UNI-SHARE</strong>. The first
+            <em>Text</em> action is labeled <strong>API Convert URL</strong> —
+            set it to
+            <code>https://YOUR_HOSTNAME/api/v1/convert</code> (same host as
+            <code>PUBLIC_BASE_URL</code>).
           </li>
           <li>
-            Add <em>Get Contents of URL</em>. Method POST. URL = your convert
-            endpoint (button above). Request body JSON:
-            <code>{"url":"Shortcut Input","target":"Menu Result"}</code>
-            (use Magic Variables for those fields). Header
-            <code>Content-Type: application/json</code>.
-          </li>
-          <li>Add <em>Get Dictionary Value</em> for key <code>url</code>.</li>
-          <li>Add <em>Open URLs</em> with that value.</li>
-          <li>
-            Optional: Share the Shortcut via iCloud, then set
-            <code>SHORTCUT_INSTALL_URL</code> on the API host so Add Shortcut becomes one tap.
+            Optional: in Shortcuts, Share → <em>Copy iCloud Link</em>, then set
+            <code>SHORTCUT_INSTALL_URL</code> in the server <code>.env</code> and
+            restart so the landing Add Shortcut button uses that link.
           </li>
         </ol>
-
-        <p class="fine">
-          Details and a machine-readable action list live in
-          <a href="shortcut/blueprint.md">blueprint.md</a>.
-        </p>
       </section>
     </main>
     <script src="assets/site-config.js"></script>
@@ -75,18 +74,29 @@
         const site = window.UNI_SHARE_SITE || {};
         const input = document.getElementById("base-url");
         const btn = document.getElementById("copy-endpoint");
+        const installBtn = document.getElementById("install-btn");
+        const note = document.getElementById("install-note");
         let apiBase = String(site.apiBaseUrl || "")
           .trim()
           .replace(/\/$/, "");
 
-        if (apiBase) {
-          input.value = apiBase;
+        if (site.shortcutInstallUrl) {
+          installBtn.href = site.shortcutInstallUrl;
+          note.textContent =
+            "Add Shortcut opens your iCloud install link (SHORTCUT_INSTALL_URL / site-config).";
         }
+
+        if (apiBase) input.value = apiBase;
 
         try {
           const cfg = await fetch(`${apiBase}/api/v1/config`).then((r) => r.json());
           if (cfg.publicBaseUrl) {
             input.value = String(cfg.publicBaseUrl).replace(/\/$/, "");
+          }
+          if (cfg.shortcutInstallUrl) {
+            installBtn.href = cfg.shortcutInstallUrl;
+            note.textContent =
+              "Add Shortcut opens your iCloud install link from the API config.";
           }
         } catch (_) {}
 
