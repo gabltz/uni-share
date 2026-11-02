@@ -1,0 +1,45 @@
+# UNI-SHARE — Docker on a private host + optional Cloudflare Tunnel sidecar.
+# Public HTTPS comes from Cloudflare; this machine only binds a high local port.
+#
+#   cp .env.example .env          # set PUBLIC_BASE_URL to your CF hostname
+#   docker compose up -d --build
+#   curl -s http://127.0.0.1:38477/health
+#
+# Tunnel (pick one):
+#   A) Host-installed cloudflared → see deploy/cloudflared/config.yml.example
+#   B) Sidecar: copy config + credentials, then:
+#        docker compose --profile tunnel up -d --build
+
+services:
+  uni-share:
+    build: .
+    container_name: uni-share
+    restart: unless-stopped
+    ports:
+      # Host (uncommon) → container listen port
+      - "38477:8080"
+    env_file:
+      - .env
+    environment:
+      PORT: "8080"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  # Optional: run the tunnel next to the app (needs config + credentials files).
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: uni-share-tunnel
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    depends_on:
+      - uni-share
+    command: tunnel --config /etc/cloudflared/config.yml run
+    volumes:
+      - ./deploy/cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+      - ./deploy/cloudflared/credentials.json:/etc/cloudflared/credentials.json:ro
+    # Reach the app by Compose service name (not 127.0.0.1).
+    # Use the host-install config example if cloudflared runs outside Compose.

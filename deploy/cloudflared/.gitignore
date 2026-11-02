@@ -1,0 +1,4 @@
+config.yml
+credentials.json
+*.json
+!config.yml.example
