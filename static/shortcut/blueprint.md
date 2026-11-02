@@ -10,15 +10,12 @@ A signed Shortcut file ships in this folder:
 
 ## What the Shortcut does
 
-1. Receives a music URL (Share Sheet / ask for URL).
-2. **Text** action **API Convert URL** — full convert endpoint  
-   (`https://YOUR_HOSTNAME/api/v1/convert`). **Edit this** after deploy if it still
-   points at localhost.
-3. **Choose from Menu** — Apple Music / Deezer / Tidal / Spotify  
-   (`apple_music`, `deezer`, `tidal`, `spotify`).
-4. **Get Contents of URL** — `POST` JSON  
-   `{"url": Shortcut Input, "target": Menu Result}`.
-5. **Get Dictionary Value** — key `url`.
+1. Share Sheet **or** presse-papiers (si lancé sans entrée).
+2. **Text** **URL API de conversion** —  
+   `https://YOUR_HOSTNAME/api/v1/convert` (à éditer si besoin).
+3. **Ask** — confirme / colle le lien du morceau (prérempli Share ou clipboard).
+4. **Menu** « Ouvrir sur » — Apple Music / Deezer / Tidal / Spotify.
+5. **Get Contents of URL** — `POST` JSON `{ "url", "target" }`.
 6. **Set Clipboard** — copie l’URL résultat.
 7. **Menu** « Lien copié. Ouvrir maintenant ? » → Ouvrir / OK.
 

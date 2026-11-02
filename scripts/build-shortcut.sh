@@ -26,11 +26,17 @@ def U():
     return str(uuid.uuid4()).upper()
 
 api_text_uuid = U()
+clipboard_in_uuid = U()
+ask_uuid = U()
 menu_uuid = U()
 menu_group = U()
 download_uuid = U()
+dict_from_uuid = U()
 getvalue_uuid = U()
+result_clipboard_uuid = U()
 open_uuid = U()
+open_menu_group = U()
+open_menu_uuid = U()
 OCR = "\ufffc"
 
 def text_token_string(text, attachments=None):
@@ -42,9 +48,24 @@ def text_token_string(text, attachments=None):
 def attachment_ref(output_uuid, output_name, typ="ActionOutput"):
     return {"OutputUUID": output_uuid, "OutputName": output_name, "Type": typ}
 
+def aggrandized_attachment(output_uuid, output_name, coercion="WFURLContentItem"):
+    """Force URL/text content items into something JSON can serialize."""
+    return {
+        "OutputUUID": output_uuid,
+        "OutputName": output_name,
+        "Type": "ActionOutput",
+        "Aggrandizements": [
+            {
+                "Type": "WFCoercionVariableAggrandizement",
+                "CoercionItemClass": coercion,
+            }
+        ],
+    }
+
 shortcut_input_att = {"Type": "ExtensionInput", "VariableName": "Shortcut Input"}
 actions = []
 
+# 1) Endpoint API (éditable)
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
     "WFWorkflowActionParameters": {
@@ -54,6 +75,43 @@ actions.append({
     },
 })
 
+# 2) Presse-papiers (fallback si pas de partage)
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.getclipboard",
+    "WFWorkflowActionParameters": {
+        "UUID": clipboard_in_uuid,
+        "CustomOutputName": "Presse-papiers",
+    },
+})
+
+# 3) Demander / confirmer le lien (prérempli Share Sheet ou presse-papiers)
+#    Default = Shortcut Input ; si vide au runtime iOS utilise souvent le presse-papiers
+#    via NoInputBehavior + cette étape Ask évite le body JSON vide.
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.ask",
+    "WFWorkflowActionParameters": {
+        "UUID": ask_uuid,
+        "CustomOutputName": "Lien du morceau",
+        "WFAskActionPrompt": "Lien du morceau (Share, presse-papiers, ou colle ici)",
+        "WFInputType": "URL",
+        "WFAskActionDefaultAnswer": text_token_string(
+            OCR,
+            {
+                "{0, 1}": {
+                    **shortcut_input_att,
+                    "Aggrandizements": [
+                        {
+                            "Type": "WFCoercionVariableAggrandizement",
+                            "CoercionItemClass": "WFURLContentItem",
+                        }
+                    ],
+                }
+            },
+        ),
+    },
+})
+
+# 4) Choix de la plateforme
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
     "WFWorkflowActionParameters": {
@@ -96,6 +154,7 @@ actions.append({
     },
 })
 
+# 5) POST convert — url = réponse Ask (pas ExtensionInput brut)
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
     "WFWorkflowActionParameters": {
@@ -126,7 +185,12 @@ actions.append({
                         "WFItemType": 0,
                         "WFKey": text_token_string("url"),
                         "WFValue": text_token_string(
-                            OCR, {"{0, 1}": shortcut_input_att}
+                            OCR,
+                            {
+                                "{0, 1}": aggrandized_attachment(
+                                    ask_uuid, "Lien du morceau", "WFStringContentItem"
+                                )
+                            },
                         ),
                     },
                     {
@@ -144,7 +208,6 @@ actions.append({
     },
 })
 
-dict_from_uuid = U()
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.detect.dictionary",
     "WFWorkflowActionParameters": {
@@ -170,12 +233,10 @@ actions.append({
     },
 })
 
-# Copier automatiquement le lien
-clipboard_uuid = U()
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.setclipboard",
     "WFWorkflowActionParameters": {
-        "UUID": clipboard_uuid,
+        "UUID": result_clipboard_uuid,
         "WFInput": {
             "Value": attachment_ref(getvalue_uuid, "URL résultat"),
             "WFSerializationType": "WFTextTokenAttachment",
@@ -183,9 +244,6 @@ actions.append({
     },
 })
 
-# Demander d'ouvrir (le lien est déjà dans le presse-papiers)
-open_menu_group = U()
-open_menu_uuid = U()
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
     "WFWorkflowActionParameters": {
@@ -236,7 +294,7 @@ workflow = {
     "WFWorkflowClientRelease": "3.0",
     "WFWorkflowClientVersion": "2607.0.3",
     "WFWorkflowHasOutputFallback": False,
-    "WFWorkflowHasShortcutInputVariables": False,
+    "WFWorkflowHasShortcutInputVariables": True,
     "WFWorkflowIcon": {
         "WFWorkflowIconGlyphNumber": 59820,
         "WFWorkflowIconStartColor": 431817727,
@@ -250,12 +308,10 @@ workflow = {
     "WFWorkflowMinimumClientVersionString": "900",
     "WFWorkflowOutputContentItemClasses": [],
     "WFWorkflowTypes": ["ActionExtension", "NCWidget", "WatchKit"],
+    # Sans entrée Share Sheet → lit le presse-papiers automatiquement
     "WFWorkflowNoInputBehavior": {
-        "Name": "WFWorkflowNoInputBehaviorAskForInput",
-        "Parameters": {
-            "ItemClass": "WFURLContentItem",
-            "SerializedParameters": {},
-        },
+        "Name": "WFWorkflowNoInputBehaviorGetClipboard",
+        "Parameters": {},
     },
 }
 
