@@ -1,6 +1,7 @@
 /target
 .env
 _site/
+.vercel/
 .DS_Store
 *.swp
 .idea/

@@ -1,13 +1,15 @@
-name: Deploy GitHub Pages
+name: Deploy GitHub Pages (optional)
 
+# Optional fallback. Prefer Vercel for the landing page (see README).
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - "static/**"
+      - "scripts/build-site.sh"
       - "scripts/build-pages.sh"
       - ".github/workflows/pages.yml"
-  workflow_dispatch:
 
 permissions:
   contents: read

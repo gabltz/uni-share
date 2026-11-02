@@ -4,8 +4,8 @@ Cross-platform music link converter. Paste or share a Spotify, Apple Music,
 Deezer, or Tidal track URL and get the same recording on another service.
 
 Built as a single Rust binary: HTTP API, landing page, and Shortcut install
-docs. The same `static/` tree can also be published to GitHub Pages while the
-API runs on a separate always-on host (Fly.io).
+docs. The same `static/` tree deploys to **Vercel** (free) while the API runs
+on a free Docker host (**Render** preferred).
 
 ## Features
 
@@ -13,7 +13,7 @@ API runs on a separate always-on host (Fly.io).
 - Apple Shortcut flow via Share Sheet
 - Landing page with Add Shortcut CTA
 - Health check and CORS-enabled JSON API
-- Optional split: static site on GitHub Pages + API on Fly.io
+- Optional split: static site on Vercel + API on Render (free tiers)
 
 ## Quick start
 
@@ -119,48 +119,68 @@ ships the blueprint and install guide so you can publish that link yourself.
 
 | Piece | Where | Notes |
 | --- | --- | --- |
-| Landing + Shortcut install UX | GitHub Pages | Static only — expected URL `https://gabltz.github.io/uni-share/` |
-| Convert API | Fly.io (Dockerfile + `fly.toml`) | Always-on HTTPS; set `PUBLIC_BASE_URL` to this origin |
-| Local / Docker | Same binary serves API + `static/` | Useful for development |
+| Landing + Shortcut install UX | **Vercel** (free) | Static from `static/` via `vercel.json` + `scripts/build-site.sh` |
+| Convert API | **Render** free Web Service (Docker) | `render.yaml` + existing Dockerfile; cold starts after idle |
+| Local / Docker | Same binary serves API + `static/` | Development |
+| GitHub Pages | Optional fallback | Needs Pro if the repo stays private |
 
-Pages cannot run Rust. The static site reads `assets/site-config.js`
-(`apiBaseUrl`) so Try a link / config calls hit the Fly API, not github.io.
+Vercel cannot run the axum server. The static site reads `assets/site-config.js`
+(`apiBaseUrl`) so Try a link / Shortcut docs hit the Render API origin.
 
-### GitHub Pages
+Expected production URLs (after you create the projects):
 
-1. Repo Settings → Pages → Source: **GitHub Actions**.
-2. Add repository **Actions variables**:
-   - `API_BASE_URL` = your Fly HTTPS origin (e.g. `https://uni-share.fly.dev`)
+- Frontend: `https://uni-share.vercel.app` (exact subdomain is chosen in Vercel)
+- API: `https://uni-share-api.onrender.com` (from `render.yaml` service name)
+
+### Vercel (frontend)
+
+1. [vercel.com](https://vercel.com) → Add New → Project → Import `gabltz/uni-share` (private repos OK on the free hobby plan).
+2. Framework Preset: **Other**. Build settings come from `vercel.json`.
+3. Environment variables (Production):
+   - `API_BASE_URL` = your Render HTTPS origin (no trailing slash)
    - optional `SHORTCUT_INSTALL_URL`
-   - optional `PAGES_BASE_PATH` (default `/uni-share`)
-3. Push to `main` or run workflow **Deploy GitHub Pages**.
+4. Deploy. Re-deploy after the API URL is known if the first build used an empty `API_BASE_URL`.
 
-Private repositories need **GitHub Pro** (or a public repo) for User/Org Pages.
-This repo stays private by default; enable Pro or switch visibility only if you
-choose to.
+CLI (optional; stop at login if needed):
+
+```bash
+npm i -g vercel
+cd ~/Documents/0_IT/1_DEV/uni-share
+vercel login
+vercel link
+vercel env add API_BASE_URL
+vercel --prod
+```
 
 Preview the static bundle locally:
 
 ```bash
-API_BASE_URL=https://uni-share.fly.dev bash scripts/build-pages.sh
+API_BASE_URL=https://uni-share-api.onrender.com bash scripts/build-site.sh
 ```
 
-### Fly.io API
+### Render (API)
 
-```bash
-# once on your Mac
-brew install flyctl   # or https://fly.io/docs/hands-on/install-flyctl/
-fly auth login
-fly apps create uni-share   # rename in fly.toml if taken
-fly secrets set PUBLIC_BASE_URL=https://uni-share.fly.dev
-# optional:
-# fly secrets set SPOTIFY_CLIENT_ID=… SPOTIFY_CLIENT_SECRET=…
-# fly secrets set SHORTCUT_INSTALL_URL=https://www.icloud.com/shortcuts/…
-fly deploy
-```
+1. [render.com](https://render.com) → New → **Blueprint** (uses `render.yaml`) or **Web Service** → Docker → this repo.
+2. Plan: **Free**.
+3. Set env vars in the Render dashboard (do not commit secrets):
+   - `PUBLIC_BASE_URL` = `https://uni-share-api.onrender.com` (your real service URL)
+   - optional `SPOTIFY_CLIENT_ID` / `SPOTIFY_CLIENT_SECRET`
+   - optional `SHORTCUT_INSTALL_URL`
+4. Deploy. Confirm `GET /health` returns OK.
 
-For GitHub Actions deploy: add repository secret `FLY_API_TOKEN`
-(`fly tokens create deploy`), then run workflow **Deploy API (Fly.io)**.
+**Cold starts:** free Web Services sleep after inactivity. The first request (or
+Shortcut run) after sleep can take ~30–60 seconds. Later requests are fast until
+the next idle period.
+
+Alternatives if Render is unavailable: Koyeb free / Railway trial credits — same
+Dockerfile, set `PUBLIC_BASE_URL` to that host, then point Vercel `API_BASE_URL`
+at it.
+
+### GitHub Pages (optional)
+
+Same `static/` tree via Actions workflow **Deploy GitHub Pages**. Set Actions
+variable `API_BASE_URL` to the Render origin. Private repos need GitHub Pro for
+user Pages; prefer Vercel instead.
 
 ## License
 
