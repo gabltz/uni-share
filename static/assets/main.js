@@ -22,10 +22,10 @@
     if (note) {
       if (kind === "icloud") {
         note.textContent =
-          "Install opens your published iCloud Shortcut link. After changing the API base URL in Shortcuts, re-share the iCloud link.";
+          "L’installation ouvre ton lien iCloud. Après avoir changé l’URL API dans Raccourcis, re-partage le lien iCloud.";
       } else if (kind === "file") {
         note.textContent =
-          "Installs the signed UNI-SHARE.shortcut file. On iPhone: allow Untrusted Shortcuts if asked. Edit the first Text action (API Convert URL) if your public host is not already set.";
+          "Installe le fichier signé UNI-SHARE.shortcut. Sur iPhone : autorise les raccourcis non fiables si demandé. Modifie l’action Texte « URL API de conversion » si besoin.";
       }
     }
     return true;
