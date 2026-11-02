@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- BASE_HREF: rewritten to /uni-share/ for GitHub Pages project sites -->
+    <base href="/" />
     <title>Install UNI-SHARE Shortcut</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,11 +12,11 @@
       href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600&family=Syne:wght@700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/assets/styles.css" />
+    <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
     <header class="top">
-      <a class="brand" href="/">UNI-SHARE</a>
+      <a class="brand" href="index.html">UNI-SHARE</a>
     </header>
     <main>
       <section class="panel" style="border-top: none; padding-top: 2.5rem">
@@ -27,14 +29,14 @@
 
         <label class="field">
           <span>API base URL</span>
-          <input id="base-url" type="url" placeholder="https://your-host.example" />
+          <input id="base-url" type="url" placeholder="https://your-api-host.example" />
         </label>
 
         <div class="cta-row" style="margin-top: 1rem">
           <button class="btn primary" id="copy-endpoint" type="button">
             Copy convert endpoint
           </button>
-          <a class="btn ghost" href="/shortcut/blueprint.md">Open blueprint</a>
+          <a class="btn ghost" href="shortcut/blueprint.md">Open blueprint</a>
         </div>
 
         <ol class="steps" style="margin-top: 1.5rem">
@@ -57,25 +59,40 @@
           <li>Add <em>Open URLs</em> with that value.</li>
           <li>
             Optional: Share the Shortcut via iCloud, then set
-            <code>SHORTCUT_INSTALL_URL</code> on the server so Add Shortcut becomes one tap.
+            <code>SHORTCUT_INSTALL_URL</code> on the API host so Add Shortcut becomes one tap.
           </li>
         </ol>
 
         <p class="fine">
           Details and a machine-readable action list live in
-          <a href="/shortcut/blueprint.md">blueprint.md</a>.
+          <a href="shortcut/blueprint.md">blueprint.md</a>.
         </p>
       </section>
     </main>
+    <script src="assets/site-config.js"></script>
     <script>
       (async () => {
+        const site = window.UNI_SHARE_SITE || {};
         const input = document.getElementById("base-url");
         const btn = document.getElementById("copy-endpoint");
+        let apiBase = String(site.apiBaseUrl || "")
+          .trim()
+          .replace(/\/$/, "");
+
+        if (apiBase) {
+          input.value = apiBase;
+        }
+
         try {
-          const cfg = await fetch("/api/v1/config").then((r) => r.json());
-          if (cfg.publicBaseUrl) input.value = cfg.publicBaseUrl.replace(/\/$/, "");
+          const cfg = await fetch(`${apiBase}/api/v1/config`).then((r) => r.json());
+          if (cfg.publicBaseUrl) {
+            input.value = String(cfg.publicBaseUrl).replace(/\/$/, "");
+          }
         } catch (_) {}
-        if (!input.value) input.value = window.location.origin;
+
+        if (!input.value) {
+          input.value = apiBase || window.location.origin;
+        }
 
         btn.addEventListener("click", async () => {
           const base = input.value.replace(/\/$/, "");

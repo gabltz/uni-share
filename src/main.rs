@@ -59,8 +59,9 @@ async fn main() {
         .route("/api/v1/convert", get(convert_get).post(convert_post))
         .route("/api/v1/config", get(public_config))
         .route("/", get(index_page))
+        .route("/index.html", get(index_page))
         .nest_service("/assets", ServeDir::new(static_dir.join("assets")))
-        .nest_service("/shortcut", ServeDir::new(PathBuf::from("shortcut")))
+        .nest_service("/shortcut", ServeDir::new(static_dir.join("shortcut")))
         .layer(cors)
         .layer(SetResponseHeaderLayer::overriding(
             header::X_CONTENT_TYPE_OPTIONS,

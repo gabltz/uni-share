@@ -1,0 +1,37 @@
+# Cloudflare Tunnel config for UNI-SHARE
+# --------------------------------------
+# 1. Install cloudflared and log in (once per machine):
+#      brew install cloudflared   # or https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/install-and-setup/installation/
+#      cloudflared tunnel login
+# 2. Create a tunnel:
+#      cloudflared tunnel create uni-share
+#    Note the Tunnel ID and credentials file path printed by the CLI.
+# 3. Copy this file to config.yml and fill in tunnel / credentials-file.
+# 4. Route a hostname you control (Cloudflare DNS) to the tunnel:
+#      cloudflared tunnel route dns uni-share uni-share.example.com
+# 5. Run:
+#      cloudflared tunnel --config deploy/cloudflared/config.yml run
+#    Or as a service: cloudflared service install
+#
+# Host port: UNI-SHARE listens on 127.0.0.1:38477 via docker compose.
+# PUBLIC_BASE_URL in .env must be https://YOUR_HOSTNAME (no trailing slash).
+
+tunnel: REPLACE_WITH_TUNNEL_ID
+credentials-file: /absolute/path/to/REPLACE_WITH_TUNNEL_ID.json
+
+ingress:
+  # Host-installed cloudflared (recommended): hit the published Compose port.
+  - hostname: uni-share.example.com
+    service: http://127.0.0.1:38477
+  - service: http_status:404
+
+# --- If cloudflared runs as the Compose "tunnel" profile instead ---
+# Use a copy of this file as deploy/cloudflared/config.yml with:
+#
+#   credentials-file: /etc/cloudflared/credentials.json
+#   ingress:
+#     - hostname: uni-share.example.com
+#       service: http://uni-share:8080
+#     - service: http_status:404
+#
+# And place the JSON credentials next to it as credentials.json (gitignored).

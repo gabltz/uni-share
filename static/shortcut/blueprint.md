@@ -54,9 +54,9 @@ returned link.
 
 | Path | Role |
 | --- | --- |
-| `shortcut/install.html` | Guided install + copy API endpoint |
-| `shortcut/blueprint.md` | This action list |
-| `shortcut/actions.json` | Structured action checklist for maintainers |
+| `static/shortcut/install.html` | Guided install + copy API endpoint |
+| `static/shortcut/blueprint.md` | This action list |
+| `static/shortcut/actions.json` | Structured action checklist for maintainers |
 
 Unsigned `.shortcut` binaries cannot be imported on current iOS without Apple’s
 signing step on a Mac. Prefer an iCloud link after you build the Shortcut once.
