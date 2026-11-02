@@ -170,6 +170,40 @@ actions.append({
     },
 })
 
+# Copier automatiquement le lien
+clipboard_uuid = U()
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.setclipboard",
+    "WFWorkflowActionParameters": {
+        "UUID": clipboard_uuid,
+        "WFInput": {
+            "Value": attachment_ref(getvalue_uuid, "URL résultat"),
+            "WFSerializationType": "WFTextTokenAttachment",
+        },
+    },
+})
+
+# Demander d'ouvrir (le lien est déjà dans le presse-papiers)
+open_menu_group = U()
+open_menu_uuid = U()
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+    "WFWorkflowActionParameters": {
+        "UUID": open_menu_uuid,
+        "GroupingIdentifier": open_menu_group,
+        "WFControlFlowMode": 0,
+        "WFMenuPrompt": "Lien copié. Ouvrir maintenant ?",
+        "WFMenuItems": ["Ouvrir", "OK"],
+    },
+})
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+    "WFWorkflowActionParameters": {
+        "GroupingIdentifier": open_menu_group,
+        "WFControlFlowMode": 1,
+        "WFMenuItemTitle": "Ouvrir",
+    },
+})
 actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.openurl",
     "WFWorkflowActionParameters": {
@@ -178,6 +212,21 @@ actions.append({
             "Value": attachment_ref(getvalue_uuid, "URL résultat"),
             "WFSerializationType": "WFTextTokenAttachment",
         },
+    },
+})
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+    "WFWorkflowActionParameters": {
+        "GroupingIdentifier": open_menu_group,
+        "WFControlFlowMode": 1,
+        "WFMenuItemTitle": "OK",
+    },
+})
+actions.append({
+    "WFWorkflowActionIdentifier": "is.workflow.actions.choosefrommenu",
+    "WFWorkflowActionParameters": {
+        "GroupingIdentifier": open_menu_group,
+        "WFControlFlowMode": 2,
     },
 })
 

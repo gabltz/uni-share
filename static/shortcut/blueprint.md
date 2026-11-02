@@ -19,7 +19,8 @@ A signed Shortcut file ships in this folder:
 4. **Get Contents of URL** — `POST` JSON  
    `{"url": Shortcut Input, "target": Menu Result}`.
 5. **Get Dictionary Value** — key `url`.
-6. **Open URLs**.
+6. **Set Clipboard** — copie l’URL résultat.
+7. **Menu** « Lien copié. Ouvrir maintenant ? » → Ouvrir / OK.
 
 ## One-tap install (preferred)
 
