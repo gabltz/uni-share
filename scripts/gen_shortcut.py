@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate unsigned UNI-SHARE Shortcut — per-menu-branch convert (reliable params)."""
+"""Generate unsigned UNI-SHARE Shortcut (no fragile If conditions)."""
 from __future__ import annotations
 
 import plistlib
@@ -21,11 +21,6 @@ def text_token(text: str, attachments: dict | None = None) -> dict:
     }
 
 
-def dict_token_value(attachments: dict) -> dict:
-    """Dictionary field value from a magic variable."""
-    return text_token(OCR, attachments)
-
-
 def out_ref(uid: str, name: str, coerce: str | None = None) -> dict:
     ref: dict = {"OutputUUID": uid, "OutputName": name, "Type": "ActionOutput"}
     if coerce:
@@ -42,26 +37,11 @@ def ask_ref(ask_u: str) -> dict:
     return out_ref(ask_u, "Lien du morceau", "WFStringContentItem")
 
 
-def convert_actions(endpoint: str, ask_u: str) -> list[dict]:
-    """POST convert → parse → clipboard + open, or show error."""
-    dl_u = U()
-    dict_u = U()
-    url_u = U()
-    err_u = U()
-    if_g = U()
-    actions: list[dict] = []
-
-    # target is filled by caller via closure — we build download with placeholder
-    # replaced per branch; this helper receives target string.
-    return actions  # unused
-
-
 def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
+    """Inside one menu branch: POST → parse → copy → show URL (tap to open)."""
     dl_u = U()
     dict_u = U()
     url_u = U()
-    err_u = U()
-    if_g = U()
     actions: list[dict] = []
 
     actions.append(
@@ -73,7 +53,6 @@ def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
                 "ShowHeaders": False,
                 "WFHTTPMethod": "POST",
                 "WFHTTPBodyType": "JSON",
-                # Plain string URL — no empty magic var
                 "WFURL": endpoint,
                 "WFHTTPHeaders": {
                     "Value": {
@@ -93,8 +72,8 @@ def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
                             {
                                 "WFItemType": 0,
                                 "WFKey": text_token("url"),
-                                "WFValue": dict_token_value(
-                                    {"{0, 1}": ask_ref(ask_u)}
+                                "WFValue": text_token(
+                                    OCR, {"{0, 1}": ask_ref(ask_u)}
                                 ),
                             },
                             {
@@ -123,6 +102,7 @@ def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
             },
         }
     )
+
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.getvalueforkey",
@@ -138,23 +118,7 @@ def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
         }
     )
 
-    # If contains http
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
-            "WFWorkflowActionParameters": {
-                "UUID": U(),
-                "GroupingIdentifier": if_g,
-                "WFControlFlowMode": 0,
-                "WFCondition": 4,
-                "WFConditionalActionString": "http",
-                "WFInput": {
-                    "Value": out_ref(url_u, "URL résultat", "WFStringContentItem"),
-                    "WFSerializationType": "WFTextTokenAttachment",
-                },
-            },
-        }
-    )
+    # Always copy — no If (broken Condition param on generated shortcuts)
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.setclipboard",
@@ -167,66 +131,21 @@ def branch_convert(endpoint: str, ask_u: str, target: str) -> list[dict]:
             },
         }
     )
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.openurl",
-            "WFWorkflowActionParameters": {
-                "UUID": U(),
-                "WFInput": {
-                    "Value": out_ref(url_u, "URL résultat", "WFURLContentItem"),
-                    "WFSerializationType": "WFTextTokenAttachment",
-                },
-            },
-        }
-    )
 
-    # Otherwise show API message
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
-            "WFWorkflowActionParameters": {
-                "UUID": U(),
-                "GroupingIdentifier": if_g,
-                "WFControlFlowMode": 1,
-            },
-        }
-    )
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.getvalueforkey",
-            "WFWorkflowActionParameters": {
-                "UUID": err_u,
-                "CustomOutputName": "Message erreur",
-                "WFDictionaryKey": "message",
-                "WFInput": {
-                    "Value": out_ref(dict_u, "Dictionnaire"),
-                    "WFSerializationType": "WFTextTokenAttachment",
-                },
-            },
-        }
-    )
+    # Affiche l’URL (tapable) — pas d’If ni Open URL (Condition vide sur iOS)
     actions.append(
         {
             "WFWorkflowActionIdentifier": "is.workflow.actions.showresult",
             "WFWorkflowActionParameters": {
                 "UUID": U(),
                 "WFInput": {
-                    "Value": out_ref(err_u, "Message erreur", "WFStringContentItem"),
+                    "Value": out_ref(url_u, "URL résultat", "WFStringContentItem"),
                     "WFSerializationType": "WFTextTokenAttachment",
                 },
             },
         }
     )
-    actions.append(
-        {
-            "WFWorkflowActionIdentifier": "is.workflow.actions.conditional",
-            "WFWorkflowActionParameters": {
-                "UUID": U(),
-                "GroupingIdentifier": if_g,
-                "WFControlFlowMode": 2,
-            },
-        }
-    )
+
     return actions
 
 
@@ -240,7 +159,6 @@ def main() -> None:
     menu_g = U()
     menu_u = U()
     clip_u = U()
-
     actions: list[dict] = []
 
     actions.append(
@@ -263,7 +181,12 @@ def main() -> None:
                 "WFInputType": "URL",
                 "WFAskActionDefaultAnswer": text_token(
                     OCR,
-                    {"{0, 1}": {"Type": "ExtensionInput", "VariableName": "Shortcut Input"}},
+                    {
+                        "{0, 1}": {
+                            "Type": "ExtensionInput",
+                            "VariableName": "Shortcut Input",
+                        }
+                    },
                 ),
             },
         }
