@@ -49,7 +49,7 @@ actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.gettext",
     "WFWorkflowActionParameters": {
         "UUID": api_text_uuid,
-        "CustomOutputName": "API Convert URL",
+        "CustomOutputName": "URL API de conversion",
         "WFTextActionText": endpoint,
     },
 })
@@ -60,7 +60,7 @@ actions.append({
         "UUID": menu_uuid,
         "GroupingIdentifier": menu_group,
         "WFControlFlowMode": 0,
-        "WFMenuPrompt": "Open on",
+        "WFMenuPrompt": "Ouvrir sur",
         "WFMenuItems": ["Apple Music", "Deezer", "Tidal", "Spotify"],
     },
 })
@@ -100,12 +100,12 @@ actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.downloadurl",
     "WFWorkflowActionParameters": {
         "UUID": download_uuid,
-        "CustomOutputName": "API Response",
+        "CustomOutputName": "Réponse API",
         "ShowHeaders": False,
         "WFHTTPMethod": "POST",
         "WFHTTPBodyType": "JSON",
         "WFURL": text_token_string(
-            OCR, {"{0, 1}": attachment_ref(api_text_uuid, "API Convert URL")}
+            OCR, {"{0, 1}": attachment_ref(api_text_uuid, "URL API de conversion")}
         ),
         "WFHTTPHeaders": {
             "Value": {
@@ -149,9 +149,9 @@ actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.detect.dictionary",
     "WFWorkflowActionParameters": {
         "UUID": dict_from_uuid,
-        "CustomOutputName": "Response Dictionary",
+        "CustomOutputName": "Dictionnaire de réponse",
         "WFInput": {
-            "Value": attachment_ref(download_uuid, "API Response"),
+            "Value": attachment_ref(download_uuid, "Réponse API"),
             "WFSerializationType": "WFTextTokenAttachment",
         },
     },
@@ -161,10 +161,10 @@ actions.append({
     "WFWorkflowActionIdentifier": "is.workflow.actions.getvalueforkey",
     "WFWorkflowActionParameters": {
         "UUID": getvalue_uuid,
-        "CustomOutputName": "Result URL",
+        "CustomOutputName": "URL résultat",
         "WFDictionaryKey": "url",
         "WFInput": {
-            "Value": attachment_ref(dict_from_uuid, "Response Dictionary"),
+            "Value": attachment_ref(dict_from_uuid, "Dictionnaire de réponse"),
             "WFSerializationType": "WFTextTokenAttachment",
         },
     },
@@ -175,7 +175,7 @@ actions.append({
     "WFWorkflowActionParameters": {
         "UUID": open_uuid,
         "WFInput": {
-            "Value": attachment_ref(getvalue_uuid, "Result URL"),
+            "Value": attachment_ref(getvalue_uuid, "URL résultat"),
             "WFSerializationType": "WFTextTokenAttachment",
         },
     },
@@ -218,4 +218,4 @@ PY
 SIGNED="$ROOT/static/shortcut/UNI-SHARE.shortcut"
 shortcuts sign -m anyone -i "$ROOT/static/shortcut/UNI-SHARE-unsigned.shortcut" -o "$SIGNED"
 echo "signed → $SIGNED"
-echo "Open it once and click Add Shortcut if Shortcuts asks."
+echo "Ouvre le fichier et clique sur Ajouter le raccourci si demandé."

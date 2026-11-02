@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="/" />
-    <title>Install UNI-SHARE Shortcut</title>
+    <title>Installer le raccourci UNI-SHARE</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -19,51 +19,49 @@
     </header>
     <main>
       <section class="panel" style="border-top: none; padding-top: 2.5rem">
-        <h2>Install the Shortcut</h2>
+        <h2>Installer le raccourci</h2>
         <p>
-          One tap installs the signed <strong>UNI-SHARE</strong> Shortcut. On
-          iPhone/iPad, allow <em>Untrusted Shortcuts</em> if iOS asks (Settings →
-          Shortcuts). Prefer an iCloud link when
-          <code>SHORTCUT_INSTALL_URL</code> is set on the server.
+          Un tap installe le raccourci signé <strong>UNI-SHARE</strong>. Sur
+          iPhone/iPad, autorise les <em>raccourcis non fiables</em> si iOS le
+          demande (Réglages → Raccourcis). Si
+          <code>SHORTCUT_INSTALL_URL</code> est défini, le bouton utilise le lien
+          iCloud.
         </p>
 
         <div class="cta-row" style="margin-top: 1rem">
           <a class="btn primary" id="install-btn" href="shortcut/UNI-SHARE.shortcut"
-            >Add Shortcut</a
+            >Ajouter le raccourci</a
           >
-          <a class="btn ghost" href="shortcut/blueprint.md">Open blueprint</a>
+          <a class="btn ghost" href="shortcut/blueprint.md">Voir le plan</a>
         </div>
         <p class="fine" id="install-note">
-          File install uses <code>shortcut/UNI-SHARE.shortcut</code> (signed for
-          anyone). Apple’s one-tap iCloud import is smoother once you share the
-          Shortcut from the Mac Shortcuts app and set
-          <code>SHORTCUT_INSTALL_URL</code>.
+          Installation via <code>shortcut/UNI-SHARE.shortcut</code>. Le lien
+          iCloud reste le plus fluide une fois partagé depuis l’app Raccourcis
+          Mac.
         </p>
 
         <label class="field" style="margin-top: 1.5rem">
-          <span>API base URL (for reference / manual rebuild)</span>
-          <input id="base-url" type="url" placeholder="https://your-hostname.example" />
+          <span>URL de base de l’API (référence)</span>
+          <input id="base-url" type="url" placeholder="https://ton-domaine.example" />
         </label>
 
         <div class="cta-row" style="margin-top: 1rem">
           <button class="btn ghost" id="copy-endpoint" type="button">
-            Copy convert endpoint
+            Copier l’endpoint convert
           </button>
         </div>
 
-        <h2 style="margin-top: 2rem">After install</h2>
+        <h2 style="margin-top: 2rem">Après l’installation</h2>
         <ol class="steps">
           <li>
-            Open the Shortcut named <strong>UNI-SHARE</strong>. The first
-            <em>Text</em> action is labeled <strong>API Convert URL</strong> —
-            set it to
-            <code>https://YOUR_HOSTNAME/api/v1/convert</code> (same host as
-            <code>PUBLIC_BASE_URL</code>).
+            Ouvre le raccourci <strong>UNI-SHARE</strong>. La première action
+            <em>Texte</em> s’appelle <strong>URL API de conversion</strong> —
+            elle doit valoir
+            <code>https://TON_DOMAINE/api/v1/convert</code>.
           </li>
           <li>
-            Optional: in Shortcuts, Share → <em>Copy iCloud Link</em>, then set
-            <code>SHORTCUT_INSTALL_URL</code> in the server <code>.env</code> and
-            restart so the landing Add Shortcut button uses that link.
+            Optionnel : Partager → <em>Copier le lien iCloud</em>, puis
+            <code>SHORTCUT_INSTALL_URL</code> dans le <code>.env</code> du serveur.
           </li>
         </ol>
       </section>
@@ -83,7 +81,7 @@
         if (site.shortcutInstallUrl) {
           installBtn.href = site.shortcutInstallUrl;
           note.textContent =
-            "Add Shortcut opens your iCloud install link (SHORTCUT_INSTALL_URL / site-config).";
+            "Ajouter le raccourci ouvre ton lien iCloud (SHORTCUT_INSTALL_URL).";
         }
 
         if (apiBase) input.value = apiBase;
@@ -96,7 +94,7 @@
           if (cfg.shortcutInstallUrl) {
             installBtn.href = cfg.shortcutInstallUrl;
             note.textContent =
-              "Add Shortcut opens your iCloud install link from the API config.";
+              "Ajouter le raccourci ouvre le lien iCloud fourni par l’API.";
           }
         } catch (_) {}
 
@@ -108,10 +106,102 @@
           const base = input.value.replace(/\/$/, "");
           const endpoint = base + "/api/v1/convert";
           await navigator.clipboard.writeText(endpoint);
-          btn.textContent = "Copied";
-          setTimeout(() => (btn.textContent = "Copy convert endpoint"), 1500);
+          btn.textContent = "Copié";
+          setTimeout(() => (btn.textContent = "Copier l’endpoint convert"), 1500);
         });
       })();
     </script>
   </body>
 </html>
+
+# French notes in main.js for install
+python3 <<'PY'
+from pathlib import Path
+p = Path("static/assets/main.js")
+t = p.read_text()
+t = t.replace(
+  "Install opens your published iCloud Shortcut link. After changing the API base URL in Shortcuts, re-share the iCloud link.",
+  "L’installation ouvre ton lien iCloud. Après avoir changé l’URL API dans Raccourcis, re-partage le lien iCloud.",
+)
+t = t.replace(
+  "Installs the signed UNI-SHARE.shortcut file. On iPhone: allow Untrusted Shortcuts if asked. Edit the first Text action (API Convert URL) if your public host is not already set.",
+  "Installe le fichier signé UNI-SHARE.shortcut. Sur iPhone : autorise les raccourcis non fiables si demandé. Modifie la première action Texte (URL API de conversion) si besoin.",
+)
+p.write_text(t)
+print("main.js fr")
+PY
+
+# Landing shortcut panel french-ish - update the short copy
+python3 <<'PY'
+from pathlib import Path
+p = Path("static/index.html")
+t = p.read_text()
+t = t.replace('lang="en"', 'lang="fr"', 1)
+t = t.replace(
+'''        <p id="shortcut-copy">
+          On iPhone or iPad, tap Add Shortcut to install. Allow Untrusted Shortcuts
+          if iOS asks. The Shortcut calls the convert API and opens the
+          destination link.
+        </p>''',
+'''        <p id="shortcut-copy">
+          Sur iPhone ou iPad, appuie sur Ajouter le raccourci. Autorise les
+          raccourcis non fiables si iOS le demande. Le raccourci appelle l’API
+          et ouvre le lien de destination.
+        </p>'''
+)
+t = t.replace(">Add Shortcut</a", ">Ajouter le raccourci</a")
+t = t.replace(">Add Shortcut</a\n          >", ">Ajouter le raccourci</a\n          >")
+# hero CTA too
+t = t.replace('id="add-shortcut" href="#shortcut">Add Shortcut</a>', 'id="add-shortcut" href="#shortcut">Ajouter le raccourci</a>')
+t = t.replace(">View blueprint</a>", ">Voir le plan</a>")
+t = t.replace("<h2>Add Shortcut</h2>", "<h2>Ajouter le raccourci</h2>")
+t = t.replace("<h2>How it works</h2>", "<h2>Comment ça marche</h2>")
+t = t.replace("<h2>Try a link</h2>", "<h2>Essayer un lien</h2>")
+t = t.replace(
+  "Drop a Spotify, Apple Music, Deezer, or Tidal link into the Shortcut.\n          Pick where you listen. Open the track there.",
+  "Envoie un lien Spotify, Apple Music, Deezer ou Tidal dans le raccourci.\n          Choisis où tu écoutes. Ouvre le morceau là-bas.",
+)
+t = t.replace("One share. Your service.", "Un lien. Ton service.")
+t = t.replace(">How it works</a>", ">Comment ça marche</a>")
+t = t.replace(
+'''        <p>
+          From the share sheet on a track link, run UNI-SHARE, choose Apple Music,
+          Deezer, Tidal, or Spotify, and the Shortcut asks this API for the match.
+        </p>
+        <ol class="steps">
+          <li>Install the Shortcut once.</li>
+          <li>Share any supported track URL into it.</li>
+          <li>Pick your target service and open the result.</li>
+        </ol>''',
+'''        <p>
+          Depuis la feuille de partage d’un lien de morceau, lance UNI-SHARE,
+          choisis Apple Music, Deezer, Tidal ou Spotify : le raccourci interroge
+          l’API pour trouver la correspondance.
+        </p>
+        <ol class="steps">
+          <li>Installe le raccourci une fois.</li>
+          <li>Partage n’importe quel lien supporté vers le raccourci.</li>
+          <li>Choisis le service cible et ouvre le résultat.</li>
+        </ol>'''
+)
+t = t.replace("Paste a track URL and choose a target to preview the API.", "Colle un lien de morceau et choisis une cible pour tester l’API.")
+t = t.replace(">Convert</button>", ">Convertir</button>")
+t = t.replace(">Track URL</span>", ">Lien du morceau</span>")
+t = t.replace(">Target</span>", ">Cible</span>")
+p.write_text(t)
+print("index fr-ish")
+PY
+
+bash scripts/build-shortcut.sh
+open -a Shortcuts "$(pwd)/static/shortcut/UNI-SHARE.shortcut"
+open -R "$(pwd)/static/shortcut/UNI-SHARE.shortcut"
+
+echo "=== API test intl-fr track ==="
+curl -sS -m 60 -X POST "https://umls.gab.rip/api/v1/convert" \
+  -H 'content-type: application/json' \
+  -d '{"url":"https://open.spotify.com/intl-fr/track/2ilcUmYn0pMNlfx3aCljQo?si=815b11f621374a34","target":"apple_music"}'
+echo
+curl -sS -m 60 -X POST "https://umls.gab.rip/api/v1/convert" \
+  -H 'content-type: application/json' \
+  -d '{"url":"https://open.spotify.com/intl-fr/track/2ilcUmYn0pMNlfx3aCljQo?si=815b11f621374a34","target":"deezer"}'
+echo

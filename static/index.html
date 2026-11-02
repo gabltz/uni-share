@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- BASE_HREF: rewritten to /uni-share/ for GitHub Pages project sites -->
     <base href="/" />
-    <title>UNI-SHARE — Music links that travel</title>
+    <title>UNI-SHARE — Des liens musique qui voyagent</title>
     <meta
       name="description"
-      content="Share a Spotify, Apple Music, Deezer, or Tidal track. UNI-SHARE opens it on the service you actually use."
+      content="Partage un morceau Spotify, Apple Music, Deezer ou Tidal. UNI-SHARE l’ouvre sur le service que tu utilises."
     />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -53,52 +53,53 @@
     <main>
       <section class="hero">
         <p class="brand-mark">UNI-SHARE</p>
-        <h1>One share. Your service.</h1>
+        <h1>Un lien. Ton service.</h1>
         <p class="lede">
-          Drop a Spotify, Apple Music, Deezer, or Tidal link into the Shortcut.
-          Pick where you listen. Open the track there.
+          Envoie un lien Spotify, Apple Music, Deezer ou Tidal dans le raccourci.
+          Choisis où tu écoutes. Ouvre le morceau là-bas.
         </p>
         <div class="cta-row">
-          <a class="btn primary" id="add-shortcut" href="#shortcut">Add Shortcut</a>
-          <a class="btn ghost" href="#how">How it works</a>
+          <a class="btn primary" id="add-shortcut" href="#shortcut">Ajouter le raccourci</a>
+          <a class="btn ghost" href="#how">Comment ça marche</a>
         </div>
       </section>
 
       <section class="panel" id="how">
-        <h2>How it works</h2>
+        <h2>Comment ça marche</h2>
         <p>
-          From the share sheet on a track link, run UNI-SHARE, choose Apple Music,
-          Deezer, Tidal, or Spotify, and the Shortcut asks this API for the match.
+          Depuis la feuille de partage d’un lien, lance UNI-SHARE, choisis Apple Music,
+          Deezer, Tidal ou Spotify : le raccourci interroge l’API pour trouver la
+          correspondance.
         </p>
         <ol class="steps">
-          <li>Install the Shortcut once.</li>
-          <li>Share any supported track URL into it.</li>
-          <li>Pick your target service and open the result.</li>
+          <li>Installe le raccourci une fois.</li>
+          <li>Partage un lien supporté vers le raccourci.</li>
+          <li>Choisis le service cible et ouvre le résultat.</li>
         </ol>
       </section>
 
       <section class="panel" id="shortcut">
-        <h2>Add Shortcut</h2>
+        <h2>Ajouter le raccourci</h2>
         <p id="shortcut-copy">
-          On iPhone or iPad, tap Add Shortcut to install. Allow Untrusted Shortcuts
-          if iOS asks. The Shortcut calls the convert API and opens the
-          destination link.
+          Sur iPhone ou iPad, appuie sur Ajouter le raccourci. Autorise les
+          raccourcis non fiables si iOS le demande. Le raccourci appelle l’API
+          et ouvre le lien de destination.
         </p>
         <div class="cta-row">
           <a class="btn primary" id="shortcut-install" href="shortcut/UNI-SHARE.shortcut"
             >Add Shortcut</a
           >
-          <a class="btn ghost" href="shortcut/blueprint.md">View blueprint</a>
+          <a class="btn ghost" href="shortcut/blueprint.md">Voir le plan</a>
         </div>
         <p class="fine" id="shortcut-note"></p>
       </section>
 
       <section class="panel" id="try">
-        <h2>Try a link</h2>
-        <p>Paste a track URL and choose a target to preview the API.</p>
+        <h2>Essayer un lien</h2>
+        <p>Colle un lien de morceau et choisis une cible pour tester l’API.</p>
         <form id="convert-form" class="try-form">
           <label class="field">
-            <span>Track URL</span>
+            <span>Lien du morceau</span>
             <input
               type="url"
               name="url"
@@ -108,7 +109,7 @@
             />
           </label>
           <label class="field">
-            <span>Target</span>
+            <span>Cible</span>
             <select name="target">
               <option value="apple_music">Apple Music</option>
               <option value="deezer">Deezer</option>
@@ -116,7 +117,7 @@
               <option value="spotify">Spotify</option>
             </select>
           </label>
-          <button class="btn primary" type="submit">Convert</button>
+          <button class="btn primary" type="submit">Convertir</button>
         </form>
         <pre class="result" id="convert-result" hidden></pre>
       </section>
