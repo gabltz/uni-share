@@ -1,0 +1,36 @@
+# Fly.io app config for the UNI-SHARE API (+ optional same-origin static).
+# Create the app once (requires flyctl login), then deploy:
+#   fly apps create uni-share
+#   fly secrets set PUBLIC_BASE_URL=https://uni-share.fly.dev
+#   fly secrets set SPOTIFY_CLIENT_ID=… SPOTIFY_CLIENT_SECRET=…
+#   fly deploy
+#
+# Change `app` if that name is taken.
+
+app = "uni-share"
+primary_region = "cdg"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+  [[http_service.checks]]
+    interval = "30s"
+    timeout = "5s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

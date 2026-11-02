@@ -3,6 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- BASE_HREF: rewritten to /uni-share/ for GitHub Pages project sites -->
+    <base href="/" />
     <title>UNI-SHARE — Music links that travel</title>
     <meta
       name="description"
@@ -14,8 +16,8 @@
       href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600&family=Syne:wght@600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="/assets/styles.css" />
-    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <div class="atmosphere" aria-hidden="true">
@@ -45,7 +47,7 @@
     </div>
 
     <header class="top">
-      <a class="brand" href="/" aria-label="UNI-SHARE home">UNI-SHARE</a>
+      <a class="brand" href="index.html" aria-label="UNI-SHARE home">UNI-SHARE</a>
     </header>
 
     <main>
@@ -79,14 +81,14 @@
         <h2>Add Shortcut</h2>
         <p id="shortcut-copy">
           On iPhone or iPad, tap Add Shortcut to install. Allow Untrusted Shortcuts
-          if iOS asks. The Shortcut calls this server’s convert API and opens the
+          if iOS asks. The Shortcut calls the convert API and opens the
           destination link.
         </p>
         <div class="cta-row">
-          <a class="btn primary" id="shortcut-install" href="/shortcut/install.html"
+          <a class="btn primary" id="shortcut-install" href="shortcut/install.html"
             >Add Shortcut</a
           >
-          <a class="btn ghost" href="/shortcut/blueprint.md">View blueprint</a>
+          <a class="btn ghost" href="shortcut/blueprint.md">View blueprint</a>
         </div>
         <p class="fine" id="shortcut-note"></p>
       </section>
@@ -122,9 +124,10 @@
 
     <footer class="foot">
       <span>UNI-SHARE</span>
-      <a href="/health">API health</a>
+      <a id="health-link" href="/health">API health</a>
     </footer>
 
-    <script src="/assets/main.js" defer></script>
+    <script src="assets/site-config.js"></script>
+    <script src="assets/main.js" defer></script>
   </body>
 </html>

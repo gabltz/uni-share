@@ -11,7 +11,6 @@ RUN apt-get update \
 WORKDIR /app
 COPY --from=builder /app/target/release/uni_share /usr/local/bin/uni_share
 COPY static ./static
-COPY shortcut ./shortcut
 ENV PORT=8080
 EXPOSE 8080
 CMD ["uni_share"]

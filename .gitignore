@@ -1,5 +1,6 @@
 /target
 .env
+_site/
 .DS_Store
 *.swp
 .idea/
