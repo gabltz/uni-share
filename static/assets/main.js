@@ -6,35 +6,38 @@
   const form = document.getElementById("convert-form");
   const result = document.getElementById("convert-result");
   const shortcutInstall = document.getElementById("shortcut-install");
-  const addShortcut = document.getElementById("add-shortcut");
   const note = document.getElementById("shortcut-note");
   const healthLink = document.getElementById("health-link");
+  const apiSnippet = document.getElementById("api-snippet");
   const FILE_INSTALL = "shortcut/UNI-SHARE.shortcut";
 
   function apiUrl(path) {
     return `${apiBase}${path}`;
   }
 
+  function refreshSnippet() {
+    if (!apiSnippet) return;
+    const origin = apiBase || window.location.origin;
+    apiSnippet.textContent = `curl -s -X POST ${origin}/api/v1/convert \\
+  -H 'content-type: application/json' \\
+  -d '{"url":"https://open.spotify.com/track/…","target":"apple_music"}'`;
+  }
+
   function applyShortcutUrl(url, kind) {
     if (!url || !shortcutInstall) return false;
     shortcutInstall.href = url;
-    if (addShortcut) addShortcut.href = url;
     if (note) {
-      if (kind === "icloud") {
-        note.textContent =
-          "L’installation ouvre ton lien iCloud. Après avoir changé l’URL API dans Raccourcis, re-partage le lien iCloud.";
-      } else if (kind === "file") {
-        note.textContent =
-          "Installe le fichier signé UNI-SHARE.shortcut. Sur iPhone : autorise les raccourcis non fiables si demandé. Modifie l’action Texte « URL API de conversion » si besoin.";
-      }
+      note.textContent =
+        kind === "icloud"
+          ? "Installation via iCloud."
+          : "Sur iPhone : autorise les raccourcis non fiables si demandé.";
     }
     return true;
   }
 
   async function loadConfig() {
-    if (healthLink) {
-      healthLink.href = apiUrl("/health");
-    }
+    if (healthLink) healthLink.href = apiUrl("/health");
+    refreshSnippet();
 
     let usedIcloud = false;
     if (site.shortcutInstallUrl) {
@@ -48,17 +51,16 @@
       if (!apiBase && data.publicBaseUrl) {
         apiBase = String(data.publicBaseUrl).replace(/\/$/, "");
         if (healthLink) healthLink.href = apiUrl("/health");
+        refreshSnippet();
       }
       if (data.shortcutInstallUrl) {
         usedIcloud = applyShortcutUrl(data.shortcutInstallUrl, "icloud");
       }
     } catch (_) {
-      /* ignore — fall through to file install */
+      /* fall through to file install */
     }
 
-    if (!usedIcloud) {
-      applyShortcutUrl(FILE_INSTALL, "file");
-    }
+    if (!usedIcloud) applyShortcutUrl(FILE_INSTALL, "file");
   }
 
   form?.addEventListener("submit", async (event) => {
@@ -68,7 +70,7 @@
     const target = String(fd.get("target") || "apple_music");
     result.hidden = false;
     result.classList.remove("error");
-    result.textContent = "Converting…";
+    result.textContent = "…";
     try {
       const res = await fetch(apiUrl("/api/v1/convert"), {
         method: "POST",
@@ -81,7 +83,7 @@
         result.textContent = data.message || data.error || "Conversion failed";
         return;
       }
-      result.textContent = JSON.stringify(data, null, 2);
+      result.textContent = data.url || JSON.stringify(data, null, 2);
     } catch (err) {
       result.classList.add("error");
       result.textContent = String(err);
