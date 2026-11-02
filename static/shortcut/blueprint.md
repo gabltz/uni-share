@@ -1,62 +1,51 @@
 # UNI-SHARE Shortcut blueprint
 
-Build this once in the Shortcuts app, then optionally publish an iCloud link and
-set `SHORTCUT_INSTALL_URL` so the landing page Add Shortcut button opens it
-directly.
+A signed Shortcut file ships in this folder:
 
-## Purpose
+| File | Role |
+| --- | --- |
+| `UNI-SHARE.shortcut` | Signed for anyone — landing **Add Shortcut** downloads this when no iCloud URL is set |
+| `install.html` | Install page (iCloud link if configured, else the `.shortcut` file) |
+| `actions.json` | Structured action checklist |
 
-Accept a shared music URL, ask which service to open, call UNI-SHARE, open the
-returned link.
+## What the Shortcut does
 
-## Inputs
-
-- Share Sheet / Shortcut Input: URL or Text containing a Spotify, Apple Music,
-  Deezer, or Tidal track link.
-
-## Actions
-
-1. **Receive** — URLs, Text (from Share Sheet).
-2. **Choose from Menu**
-   - Apple Music → Text `apple_music`
-   - Deezer → Text `deezer`
-   - Tidal → Text `tidal`
-   - Spotify → Text `spotify`
-3. **Get Contents of URL**
-   - Method: `POST`
-   - URL: `https://YOUR_HOST/api/v1/convert`
-   - Headers: `Content-Type: application/json`
-   - Body (JSON):
-     ```json
-     {
-       "url": "<Shortcut Input>",
-       "target": "<Chosen target text>"
-     }
-     ```
-4. **Get Dictionary from Input** (if needed).
+1. Receives a music URL (Share Sheet / ask for URL).
+2. **Text** action **API Convert URL** — full convert endpoint  
+   (`https://YOUR_HOSTNAME/api/v1/convert`). **Edit this** after deploy if it still
+   points at localhost.
+3. **Choose from Menu** — Apple Music / Deezer / Tidal / Spotify  
+   (`apple_music`, `deezer`, `tidal`, `spotify`).
+4. **Get Contents of URL** — `POST` JSON  
+   `{"url": Shortcut Input, "target": Menu Result}`.
 5. **Get Dictionary Value** — key `url`.
-6. **Open URLs**.
+6. **Set Clipboard** — copie l’URL résultat.
+7. **Menu** « Lien copié. Ouvrir maintenant ? » → Ouvrir / OK.
 
-## One-tap install (recommended after first export)
+## One-tap install (preferred)
 
-1. In Shortcuts, tap Share → Copy iCloud Link.
-2. Set on the server:
+1. On the Mac, open `UNI-SHARE.shortcut` in Shortcuts and confirm **Add Shortcut** once
+   (Automation cannot click that dialog without Accessibility permission).
+2. Shortcuts → Share → **Copy iCloud Link**.
+3. Set on the server:
 
    ```bash
    SHORTCUT_INSTALL_URL=https://www.icloud.com/shortcuts/……
-   PUBLIC_BASE_URL=https://YOUR_HOST
+   PUBLIC_BASE_URL=https://YOUR_HOSTNAME
    ```
 
-3. Restart UNI-SHARE. The landing page Add Shortcut button then opens that iCloud
-   link.
+4. Restart the container / process. Landing **Add Shortcut** then opens the iCloud link.
 
-## Hosted files in this repo
+## File install limitation
 
-| Path | Role |
-| --- | --- |
-| `static/shortcut/install.html` | Guided install + copy API endpoint |
-| `static/shortcut/blueprint.md` | This action list |
-| `static/shortcut/actions.json` | Structured action checklist for maintainers |
+Hosting `UNI-SHARE.shortcut` works for Mac and for iOS when **Untrusted Shortcuts**
+is allowed. iCloud links are still the smoothest phone install path Apple supports
+for sharing.
 
-Unsigned `.shortcut` binaries cannot be imported on current iOS without Apple’s
-signing step on a Mac. Prefer an iCloud link after you build the Shortcut once.
+## Rebuild / resign (Mac)
+
+```bash
+# After changing PUBLIC_BASE_URL in .env
+bash scripts/build-shortcut.sh
+# Then open static/shortcut/UNI-SHARE.shortcut and click Add Shortcut if prompted
+```

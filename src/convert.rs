@@ -263,13 +263,25 @@ impl Converter {
         info: &TrackInfo,
         country: &str,
     ) -> Result<Option<TrackInfo>, AppError> {
-        if let Some(isrc) = info.isrc.as_deref() {
-            if let Some(found) = self.itunes.by_isrc(isrc, country).await? {
-                return Ok(Some(found));
+        // Try the requested storefront first, then common fallbacks (FR/US).
+        let mut countries = vec![country.to_string()];
+        for extra in ["FR", "US"] {
+            if !countries.iter().any(|c| c.eq_ignore_ascii_case(extra)) {
+                countries.push(extra.to_string());
             }
         }
-        if let (Some(title), Some(artist)) = (info.title.as_deref(), info.artist.as_deref()) {
-            return self.itunes.search(title, artist, country).await;
+
+        for c in &countries {
+            if let Some(isrc) = info.isrc.as_deref() {
+                if let Some(found) = self.itunes.by_isrc(isrc, c).await? {
+                    return Ok(Some(found));
+                }
+            }
+            if let (Some(title), Some(artist)) = (info.title.as_deref(), info.artist.as_deref()) {
+                if let Some(found) = self.itunes.search(title, artist, c).await? {
+                    return Ok(Some(found));
+                }
+            }
         }
         Ok(None)
     }
